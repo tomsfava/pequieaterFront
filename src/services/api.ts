@@ -63,7 +63,7 @@ export const api = createApi({
 
     toggleFollow: builder.mutation<UserPublic, number>({
       query: (userIdToFollow) => ({
-        url: `/${userIdToFollow}/toggle_follow/`,
+        url: `/user/${userIdToFollow}/toggle_follow/`,
         method: 'POST',
       }),
       invalidatesTags: (result, error, id) => [
