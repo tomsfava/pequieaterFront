@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import type { AuthResponse, UserPublic } from '../types/api'
+import type { AuthResponse, UserPublic, Post } from '../types/api'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -19,7 +19,7 @@ export const api = createApi({
   endpoints: (builder) => ({
     login: builder.mutation<AuthResponse, { username: string; password: string }>({
       query: (credentials) => ({
-        url: '/auth/',
+        url: '/login/',
         method: 'POST',
         body: credentials,
       }),
@@ -30,7 +30,7 @@ export const api = createApi({
       providesTags: (result, error, id) => [{ type: 'User', id }],
     }),
 
-    getPosts: builder.query<any[], { authorId?: string | number; filter?: 'following' }>({
+    getPosts: builder.query<Post[], { authorId?: string | number; filter?: 'following' }>({
       query: (params) => {
         const queryParams = new URLSearchParams()
         if (params.authorId) {
@@ -44,7 +44,7 @@ export const api = createApi({
       providesTags: ['Post'],
     }),
 
-    createPost: builder.mutation<any, { content: string }>({
+    createPost: builder.mutation<Post, { content: string }>({
       query: (newPost) => ({
         url: '/posts/',
         method: 'POST',
@@ -63,7 +63,7 @@ export const api = createApi({
 
     toggleFollow: builder.mutation<UserPublic, number>({
       query: (userIdToFollow) => ({
-        url: `/toggle_follow/${userIdToFollow}/`,
+        url: `/${userIdToFollow}/toggle_follow/`,
         method: 'POST',
       }),
       invalidatesTags: (result, error, id) => [
