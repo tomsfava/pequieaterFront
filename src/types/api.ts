@@ -27,3 +27,9 @@ export interface Post {
   author: SimpleUser
   created_at: string
 }
+
+export interface ApiError {
+  detail?: string
+  non_field_errors?: string[]
+  [key: string]: string[] | string | undefined
+}
