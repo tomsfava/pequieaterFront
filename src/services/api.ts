@@ -18,6 +18,17 @@ export const api = createApi({
     }),
     tagTypes: ['User', 'Post'],
     endpoints: (builder) => ({
+        register: builder.mutation<
+            AuthResponse,
+            { username: string; password: string; password2: string }
+        >({
+            query: (credentials) => ({
+                url: '/register/',
+                method: 'POST',
+                body: credentials,
+            }),
+        }),
+
         login: builder.mutation<AuthResponse, { username: string; password: string }>({
             query: (credentials) => ({
                 url: '/login/',
@@ -88,6 +99,7 @@ export const api = createApi({
 })
 
 export const {
+    useRegisterMutation,
     useLoginMutation,
     useGetUserByIdQuery,
     useGetPostsQuery,
