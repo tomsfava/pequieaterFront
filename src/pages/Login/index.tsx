@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 import { useLoginMutation } from '../../services/api'
 import { setCredentials, selectIsAuthenticated } from '../../store/reducers/auth'
@@ -94,6 +94,9 @@ const Login = () => {
                 </button>
                 {isError && <p>Erro ao fazer login. Verifique suas credenciais</p>}
             </form>
+            <p>
+                Não tem uma conta? <Link to="/register">Cadastre-se</Link>
+            </p>
         </div>
     )
 }
