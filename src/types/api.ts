@@ -31,5 +31,10 @@ export interface Post {
 export interface ApiError {
     detail?: string
     non_field_errors?: string[]
+    username?: string[]
+    email?: string[]
+    password?: string[]
+    password2?: string[]
+    bio?: string[]
     [key: string]: string[] | string | undefined
 }
