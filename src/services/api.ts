@@ -20,7 +20,7 @@ export const api = createApi({
     endpoints: (builder) => ({
         register: builder.mutation<
             AuthResponse,
-            { username: string; password: string; password2: string }
+            { username: string; email: string; password: string; password2: string; bio: string }
         >({
             query: (credentials) => ({
                 url: '/register/',
@@ -40,6 +40,11 @@ export const api = createApi({
         getUserById: builder.query<UserPublic, string | number>({
             query: (id) => `/user/${id}/`,
             providesTags: (result, error, id) => [{ type: 'User', id }],
+        }),
+
+        getMe: builder.query<UserPublic, void>({
+            query: () => '/user/me/',
+            providesTags: (result, error) => [{ type: 'User', id: 'me' }],
         }),
 
         getPosts: builder.query<Post[], { authorId?: string | number; filter?: 'following' }>({
@@ -102,6 +107,7 @@ export const {
     useRegisterMutation,
     useLoginMutation,
     useGetUserByIdQuery,
+    useGetMeQuery,
     useGetPostsQuery,
     useCreatePostMutation,
     useDeletePostMutation,
