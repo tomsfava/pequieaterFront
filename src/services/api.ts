@@ -18,6 +18,17 @@ export const api = createApi({
     }),
     tagTypes: ['User', 'Post'],
     endpoints: (builder) => ({
+        register: builder.mutation<
+            AuthResponse,
+            { username: string; email: string; password: string; password2: string; bio: string }
+        >({
+            query: (credentials) => ({
+                url: '/register/',
+                method: 'POST',
+                body: credentials,
+            }),
+        }),
+
         login: builder.mutation<AuthResponse, { username: string; password: string }>({
             query: (credentials) => ({
                 url: '/login/',
@@ -59,12 +70,12 @@ export const api = createApi({
                 url: `/posts/${postId}/`,
                 method: 'DELETE',
             }),
-            invalidatesTags: (result, error, id) => [{ type: 'Post', id }],
+            invalidatesTags: ['Post'],
         }),
 
         toggleFollow: builder.mutation<UserPublic, number>({
             query: (userIdToFollow) => ({
-                url: `/user/${userIdToFollow}/toggle_follow/`,
+                url: `/user/${userIdToFollow}/toggle-follow/`,
                 method: 'POST',
             }),
             invalidatesTags: (result, error, id) => [
@@ -88,6 +99,7 @@ export const api = createApi({
 })
 
 export const {
+    useRegisterMutation,
     useLoginMutation,
     useGetUserByIdQuery,
     useGetPostsQuery,
