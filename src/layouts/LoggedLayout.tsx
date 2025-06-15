@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout, selectUserId } from '../store/reducers/auth'
-import { useGetMeQuery } from '../services/api'
+import { useGetUserByIdQuery } from '../services/api' // Changed to useGetUserByIdQuery
 
 const LoggedLayout = () => {
     const dispatch = useDispatch()
@@ -16,7 +16,7 @@ const LoggedLayout = () => {
         isLoading: isLoadingCurrentUser,
         isError: isErrorCurrentUser,
         error: currentUserError,
-    } = useGetMeQuery()
+    } = useGetUserByIdQuery(loggedInUserId!, { skip: !loggedInUserId }) // Changed to useGetUserByIdQuery with skip
 
     useEffect(() => {
         if (isErrorCurrentUser && currentUserError) {

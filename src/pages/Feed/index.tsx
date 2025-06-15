@@ -5,30 +5,34 @@ import {
     useGetPostsQuery,
     useCreatePostMutation,
     useDeletePostMutation,
-    useGetMeQuery,
+    useGetUserByIdQuery,
 } from '../../services/api'
 import { logout, selectUserId } from '../../store/reducers/auth'
 import type { ApiError } from '../../types/api'
 
 const Feed = () => {
+    const [feedType, setFeedType] = useState<'all' | 'following'>('all')
+
     const {
         data: posts,
         isLoading: isLoadingPosts,
         isError: isErrorPosts,
         error: postsError,
-    } = useGetPostsQuery()
+        refetch: refetchPosts,
+    } = useGetPostsQuery({ filter: feedType === 'following' ? 'following' : undefined })
+
+    const loggedInUserId = useSelector(selectUserId)
     const {
         data: currentUser,
         isLoading: isLoadingMe,
         isError: isErrorMe,
         error: meError,
-    } = useGetMeQuery()
+    } = useGetUserByIdQuery(loggedInUserId!, { skip: !loggedInUserId })
+
     const [createPost, { isLoading: isCreatingPost, isError: isCreateError, error: createError }] =
         useCreatePostMutation()
     const [deletePost, { isLoading: isDeletingPost, isError: isDeleteError, error: deleteError }] =
         useDeletePostMutation()
-
-    const loggedInUserId = useSelector(selectUserId)
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -107,4 +111,101 @@ const Feed = () => {
         dispatch,
         navigate,
     ])
+
+    const handleCreatePost = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!newPostContent.trim()) {
+            alert('A postagem não pode estar vazia.')
+            return
+        }
+        try {
+            await createPost({ content: newPostContent }).unwrap()
+            setNewPostContent('')
+        } catch (err) {
+            console.error('Erro de requisição ao criar postagem:', err)
+        }
+    }
+
+    const handleDeletePost = async (postId: number) => {
+        if (!window.confirm('Tem certeza que deseja deletar esta postagem?')) {
+            return
+        }
+        try {
+            await deletePost(postId).unwrap()
+        } catch (err) {
+            console.error('Erro de requisição ao deletar postagem:', err)
+        }
+    }
+
+    if (isLoadingMe || isLoadingPosts) {
+        return <div>Carregando Feed...</div>
+    }
+
+    return (
+        <div>
+            <form onSubmit={handleCreatePost}>
+                <h3>Roeção</h3>
+                <textarea
+                    value={newPostContent}
+                    onChange={(e) => setNewPostContent(e.target.value)}
+                    placeholder="Cuidado com o espinho... mas solta o dente!"
+                    rows={4}
+                    disabled={isCreatingPost}
+                />
+                <button type="submit" disabled={isCreatingPost}>
+                    {isCreatingPost ? 'Publicando...' : 'Publicar'}
+                </button>
+            </form>
+
+            <hr />
+
+            <div>
+                <button onClick={() => setFeedType('all')} disabled={feedType === 'all'}>
+                    Todas as postagens
+                </button>
+                <button
+                    onClick={() => setFeedType('following')}
+                    disabled={feedType === 'following'}
+                >
+                    Apenas quem eu sigo
+                </button>
+            </div>
+
+            <hr />
+
+            <div>
+                {posts && posts.length > 0 ? (
+                    posts.map((post) => (
+                        <div
+                            key={post.id}
+                            style={{ border: '1px solid #ccc', margin: '10px 0', padding: '10px' }}
+                        >
+                            <p>{post.content}</p>
+                            <div>
+                                <Link to={`/profile/${post.author.id}`}>
+                                    @{post.author.username}
+                                </Link>
+                                <span> - {new Date(post.created_at).toLocaleString()}</span>
+                                {loggedInUserId === post.author.id && (
+                                    <button
+                                        onClick={() => handleDeletePost(post.id)}
+                                        disabled={isDeletingPost}
+                                    >
+                                        {isDeletingPost ? 'Deletando...' : 'Deletar'}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    ))
+                ) : // Alteração na mensagem condicional
+                feedType === 'following' ? (
+                    <p>Ninguém que você segue roeu ainda.</p>
+                ) : (
+                    <p>Nenhuma roeção na area, que tal criar uma?</p>
+                )}
+            </div>
+        </div>
+    )
 }
+
+export default Feed

@@ -42,11 +42,6 @@ export const api = createApi({
             providesTags: (result, error, id) => [{ type: 'User', id }],
         }),
 
-        getMe: builder.query<UserPublic, void>({
-            query: () => '/user/me/',
-            providesTags: (result, error) => [{ type: 'User', id: 'me' }],
-        }),
-
         getPosts: builder.query<Post[], { authorId?: string | number; filter?: 'following' }>({
             query: (params) => {
                 const queryParams = new URLSearchParams()
@@ -75,12 +70,12 @@ export const api = createApi({
                 url: `/posts/${postId}/`,
                 method: 'DELETE',
             }),
-            invalidatesTags: (result, error, id) => [{ type: 'Post', id }],
+            invalidatesTags: ['Post'],
         }),
 
         toggleFollow: builder.mutation<UserPublic, number>({
             query: (userIdToFollow) => ({
-                url: `/user/${userIdToFollow}/toggle_follow/`,
+                url: `/user/${userIdToFollow}/toggle-follow/`,
                 method: 'POST',
             }),
             invalidatesTags: (result, error, id) => [
@@ -107,7 +102,6 @@ export const {
     useRegisterMutation,
     useLoginMutation,
     useGetUserByIdQuery,
-    useGetMeQuery,
     useGetPostsQuery,
     useCreatePostMutation,
     useDeletePostMutation,
