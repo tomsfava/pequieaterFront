@@ -36,5 +36,6 @@ export interface ApiError {
     password?: string[]
     password2?: string[]
     bio?: string[]
+    content?: string[]
     [key: string]: string[] | string | undefined
 }
