@@ -10,6 +10,7 @@ import {
 } from '../../services/api'
 import { logout, selectUserId } from '../../store/reducers/auth'
 import type { ApiError, SimpleUser } from '../../types/api'
+import { ProfileLayout, MainColumn, ProfileAside } from './styles'
 
 const Profile = () => {
     const { userId } = useParams<{ userId: string }>()
@@ -191,128 +192,134 @@ const Profile = () => {
     const usersToList = showFollowers ? userProfile.followers : userProfile.following
 
     return (
-        <div>
-            <h2>
-                {isMyProfile ? 'Meu Perfil' : `Perfil de @${userProfile.username}`}
-                {!isMyProfile && (
-                    <button onClick={handleToggleFollow} disabled={isTogglingFollow}>
-                        {isTogglingFollow
-                            ? '...'
-                            : userProfile.is_following
-                              ? 'Deixar de Seguir'
-                              : 'Seguir'}
-                    </button>
-                )}
-            </h2>
-            <p>
-                <strong>Usuário:</strong>@{userProfile.username}
-            </p>
-            {userProfile.email && (
+        <ProfileLayout>
+            <MainColumn>
+                <h2>
+                    {isMyProfile ? 'Meu Perfil' : `Perfil de @${userProfile.username}`}
+                    {!isMyProfile && (
+                        <button onClick={handleToggleFollow} disabled={isTogglingFollow}>
+                            {isTogglingFollow
+                                ? '...'
+                                : userProfile.is_following
+                                  ? 'Deixar de Seguir'
+                                  : 'Seguir'}
+                        </button>
+                    )}
+                </h2>
                 <p>
-                    <strong>Email:</strong>
-                    {userProfile.email}
+                    <strong>Usuário:</strong>@{userProfile.username}
                 </p>
-            )}
-            <div>
-                <strong>Bio:</strong>{' '}
-                {isMyProfile ? (
-                    isEditingBio ? (
-                        <>
-                            <textarea
-                                value={editedBio}
-                                onChange={(e) => setEditedBio(e.target.value)}
-                                rows={3}
-                                cols={40}
-                                disabled={isUpdatingProfile}
-                            />
-                            <div>
-                                <button onClick={handleSaveBio} disabled={isUpdatingProfile}>
-                                    {isUpdatingProfile ? 'Salvando...' : 'Salvar'}
-                                </button>
-                                <button onClick={handleCancelEditBio} disabled={isUpdatingProfile}>
-                                    Cancelar
-                                </button>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <p>{userProfile.bio || 'Adicione sua bio aqui.'}</p>
-                            <button onClick={() => setIsEditingBio(true)}>Editar Bio</button>
-                        </>
-                    )
-                ) : (
-                    <p>{userProfile.bio || 'Este usuário não possui uma bio.'}</p>
+                {userProfile.email && (
+                    <p>
+                        <strong>Email:</strong>
+                        {userProfile.email}
+                    </p>
                 )}
-            </div>
-            <p>
-                <strong>Seguidores:</strong> {userProfile.followers_count}
-            </p>
-            <p>
-                <strong>Seguindo:</strong> {userProfile.following_count}
-            </p>
-            ---
-            <h3>Conexões</h3>
-            <div>
-                <button onClick={() => setShowFollowers(true)} disabled={showFollowers}>
-                    Seguidores ({userProfile.followers_count})
-                </button>
-                <button onClick={() => setShowFollowers(false)} disabled={!showFollowers}>
-                    Seguindo ({userProfile.following_count})
-                </button>
-            </div>
-            <div>
-                <h4>{showFollowers ? 'Lista de Seguidores:' : 'Lista de Seguindo:'}</h4>
-                {usersToList && usersToList.length > 0 ? (
-                    <ul>
-                        {usersToList.map((user: SimpleUser) => (
-                            <li key={user.id}>
-                                <Link to={`/profile/${user.id}`}>@{user.username}</Link>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p>Nenhum {showFollowers ? 'seguidor' : 'usuário seguido'} para mostrar.</p>
-                )}
-            </div>
-            ---
-            <h3>Postagens de @{userProfile.username}</h3>
-            <button onClick={() => setShowUserPosts(!showUserPosts)}>
-                {showUserPosts ? 'Ocultar Postagens' : 'Mostrar Postagens'}
-            </button>
-            {showUserPosts && ( // Renderiza os posts apenas se showUserPosts for true
                 <div>
-                    {userPosts && userPosts.length > 0 ? (
-                        userPosts.map((post) => (
-                            <div
-                                key={post.id}
-                                style={{
-                                    border: '1px solid #eee',
-                                    margin: '10px 0',
-                                    padding: '10px',
-                                }}
-                            >
-                                <p>{post.content}</p>
+                    <strong>Bio:</strong>{' '}
+                    {isMyProfile ? (
+                        isEditingBio ? (
+                            <>
+                                <textarea
+                                    value={editedBio}
+                                    onChange={(e) => setEditedBio(e.target.value)}
+                                    rows={3}
+                                    cols={40}
+                                    disabled={isUpdatingProfile}
+                                />
                                 <div>
-                                    <span>
-                                        Publicado em: {new Date(post.created_at).toLocaleString()}
-                                    </span>
-                                    {isMyProfile && (
-                                        <button
-                                            onClick={() => handleDeletePost(post.id)}
-                                            disabled={isDeletingPost}
-                                        >
-                                            {isDeletingPost ? 'Deletando...' : 'Deletar'}
-                                        </button>
-                                    )}
+                                    <button onClick={handleSaveBio} disabled={isUpdatingProfile}>
+                                        {isUpdatingProfile ? 'Salvando...' : 'Salvar'}
+                                    </button>
+                                    <button
+                                        onClick={handleCancelEditBio}
+                                        disabled={isUpdatingProfile}
+                                    >
+                                        Cancelar
+                                    </button>
                                 </div>
-                            </div>
-                        ))
+                            </>
+                        ) : (
+                            <>
+                                <p>{userProfile.bio || 'Adicione sua bio aqui.'}</p>
+                                <button onClick={() => setIsEditingBio(true)}>Editar Bio</button>
+                            </>
+                        )
                     ) : (
-                        <p>Nenhuma postagem encontrada para este usuário.</p>
+                        <p>{userProfile.bio || 'Este usuário não possui uma bio.'}</p>
                     )}
                 </div>
-            )}
-        </div>
+                <p>
+                    <strong>Seguidores:</strong> {userProfile.followers_count}
+                </p>
+                <p>
+                    <strong>Seguindo:</strong> {userProfile.following_count}
+                </p>
+                <h3>Postagens de @{userProfile.username}</h3>
+                <button onClick={() => setShowUserPosts(!showUserPosts)}>
+                    {showUserPosts ? 'Ocultar Postagens' : 'Mostrar Postagens'}
+                </button>
+                {showUserPosts && (
+                    <div>
+                        {userPosts && userPosts.length > 0 ? (
+                            userPosts.map((post) => (
+                                <div
+                                    key={post.id}
+                                    style={{
+                                        border: '1px solid #eee',
+                                        margin: '10px 0',
+                                        padding: '10px',
+                                    }}
+                                >
+                                    <p>{post.content}</p>
+                                    <div>
+                                        <span>
+                                            Publicado em:{' '}
+                                            {new Date(post.created_at).toLocaleString()}
+                                        </span>
+                                        {isMyProfile && (
+                                            <button
+                                                onClick={() => handleDeletePost(post.id)}
+                                                disabled={isDeletingPost}
+                                            >
+                                                {isDeletingPost ? 'Deletando...' : 'Deletar'}
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p>Nenhuma postagem encontrada para este usuário.</p>
+                        )}
+                    </div>
+                )}
+            </MainColumn>
+            <ProfileAside>
+                <h3>Conexões</h3>
+                <div>
+                    <button onClick={() => setShowFollowers(true)} disabled={showFollowers}>
+                        Seguidores ({userProfile.followers_count})
+                    </button>
+                    <button onClick={() => setShowFollowers(false)} disabled={!showFollowers}>
+                        Seguindo ({userProfile.following_count})
+                    </button>
+                </div>
+                <div>
+                    <h4>{showFollowers ? 'Lista de Seguidores:' : 'Lista de Seguindo:'}</h4>
+                    {usersToList && usersToList.length > 0 ? (
+                        <ul>
+                            {usersToList.map((user: SimpleUser) => (
+                                <li key={user.id}>
+                                    <Link to={`/profile/${user.id}`}>@{user.username}</Link>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>Nenhum {showFollowers ? 'seguidor' : 'usuário seguido'} para mostrar.</p>
+                    )}
+                </div>
+            </ProfileAside>
+        </ProfileLayout>
     )
 }
 

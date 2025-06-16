@@ -1,14 +1,18 @@
 import { Outlet } from 'react-router-dom'
+import { Center, Header, TitleSub } from './styles'
 
 const UnloggedLayout = () => (
-    <div>
-        <header>
-            <h1>PequiEater</h1>
-        </header>
+    <Center>
+        <Header>
+            <TitleSub>
+                <h1>PequiEater</h1>
+                <p>Lugar de roer</p>
+            </TitleSub>
+        </Header>
         <main>
             <Outlet />
         </main>
-    </div>
+    </Center>
 )
 
 export default UnloggedLayout
