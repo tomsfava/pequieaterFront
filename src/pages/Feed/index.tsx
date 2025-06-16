@@ -144,7 +144,7 @@ const Feed = () => {
     return (
         <div>
             <form onSubmit={handleCreatePost}>
-                <h3>Roeção</h3>
+                <h3>Comece a roer:</h3>
                 <textarea
                     value={newPostContent}
                     onChange={(e) => setNewPostContent(e.target.value)}
@@ -160,20 +160,22 @@ const Feed = () => {
             <hr />
 
             <div>
-                <button onClick={() => setFeedType('all')} disabled={feedType === 'all'}>
-                    Todas as postagens
-                </button>
-                <button
-                    onClick={() => setFeedType('following')}
-                    disabled={feedType === 'following'}
-                >
-                    Apenas quem eu sigo
-                </button>
-            </div>
+                <h2>Roeções</h2>
+                <hr />
 
-            <hr />
+                <div>
+                    <button onClick={() => setFeedType('all')} disabled={feedType === 'all'}>
+                        Todas as roeções
+                    </button>
+                    <button
+                        onClick={() => setFeedType('following')}
+                        disabled={feedType === 'following'}
+                    >
+                        Apenas quem eu sigo
+                    </button>
+                </div>
 
-            <div>
+                <hr />
                 {posts && posts.length > 0 ? (
                     posts.map((post) => (
                         <div

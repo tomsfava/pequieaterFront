@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { logout, selectUserId } from '../store/reducers/auth'
-import { useGetUserByIdQuery } from '../services/api' // Changed to useGetUserByIdQuery
+import { logout, selectUserId } from '../../store/reducers/auth'
+import { useGetUserByIdQuery } from '../../services/api'
+import { Header, Nav } from './styles'
 
 const LoggedLayout = () => {
     const dispatch = useDispatch()
@@ -16,7 +17,7 @@ const LoggedLayout = () => {
         isLoading: isLoadingCurrentUser,
         isError: isErrorCurrentUser,
         error: currentUserError,
-    } = useGetUserByIdQuery(loggedInUserId!, { skip: !loggedInUserId }) // Changed to useGetUserByIdQuery with skip
+    } = useGetUserByIdQuery(loggedInUserId!, { skip: !loggedInUserId })
 
     useEffect(() => {
         if (isErrorCurrentUser && currentUserError) {
@@ -45,29 +46,32 @@ const LoggedLayout = () => {
 
     return (
         <div>
-            <header>
+            <Header>
                 <h1>PequiEater</h1>
-                <nav>
+                <Nav>
                     <ul>
-                        <li>
-                            <Link to="/feed">Feed</Link>
-                        </li>
-                        {loggedInUserId && (
-                            <li>
-                                <Link to={`/profile/${loggedInUserId}`}>Meu Perfil</Link>
-                            </li>
-                        )}
                         {currentUser && !isLoadingCurrentUser && (
                             <li>
                                 Olá, <span>{currentUser.username}</span>!
                             </li>
                         )}
+                        {!isAtFeed && (
+                            <li>
+                                <Link to="/feed">Roeções</Link>
+                            </li>
+                        )}
+                        {!isAtMyProfile && loggedInUserId && (
+                            <li>
+                                <Link to={`/profile/${loggedInUserId}`}>Meu Perfil</Link>
+                            </li>
+                        )}
+
                         <li>
                             <button onClick={handleLogout}>Sair</button>
                         </li>
                     </ul>
-                </nav>
-            </header>
+                </Nav>
+            </Header>
             <main>
                 <Outlet />
             </main>
