@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
     useGetUserByIdQuery,
@@ -10,7 +10,10 @@ import {
 } from '../../services/api'
 import { logout, selectUserId } from '../../store/reducers/auth'
 import type { ApiError, SimpleUser } from '../../types/api'
-import { ProfileLayout, MainColumn, ProfileAside } from './styles'
+import { ProfileLayout, MainColumn, ProfileAside, Post, SaveCancel } from './styles'
+import { Button, StyledLink } from '../../styles'
+import deletepng from '../../assets/delete_16dp_FF0000_FILL0_wght400_GRAD0_opsz20.svg'
+import cancelpng from '../../assets/cancel_16dp_FF0000_FILL0_wght400_GRAD0_opsz20.svg'
 
 const Profile = () => {
     const { userId } = useParams<{ userId: string }>()
@@ -55,14 +58,22 @@ const Profile = () => {
     const [isEditingBio, setIsEditingBio] = useState(false)
     const [editedBio, setEditedBio] = useState('')
 
+    const [isEditingEmail, setIsEditingEmail] = useState(false)
+    const [editedEmail, setEditedEmail] = useState('')
+
     const [showFollowers, setShowFollowers] = useState(true)
-    const [showUserPosts, setShowUserPosts] = useState(false) // Novo estado para controlar a visibilidade dos posts
+    const [showUserPosts, setShowUserPosts] = useState(false)
 
     useEffect(() => {
         if (userProfile && userProfile.bio) {
             setEditedBio(userProfile.bio)
         } else if (userProfile && !userProfile.bio) {
             setEditedBio('')
+        }
+        if (userProfile && userProfile.email) {
+            setEditedEmail(userProfile.email)
+        } else if (userProfile && !userProfile.email) {
+            setEditedEmail('')
         }
     }, [userProfile])
 
@@ -177,6 +188,27 @@ const Profile = () => {
         setEditedBio(userProfile.bio || '')
     }
 
+    const handleSaveEmail = async () => {
+        if (!parsedUserId) return
+        try {
+            await updateUserProfile({ id: parsedUserId, data: { email: editedEmail } }).unwrap()
+            setIsEditingEmail(false)
+            refetchUserProfile()
+            alert('Email atualizado com sucesso!')
+        } catch (err) {
+            console.error('Erro ao atualizar o email:', err)
+            const apiError = err as { data?: ApiError; message?: string; error?: string }
+            alert(
+                `Falha ao atualizar o email: ${apiError.data?.detail || apiError.data?.email?.[0] || apiError.message || apiError.error || 'Erro desconhecido.'}`
+            )
+        }
+    }
+
+    const handleCancelEditEmail = () => {
+        setIsEditingEmail(false)
+        setEditedEmail(userProfile.email || '')
+    }
+
     const handleDeletePost = async (postId: number) => {
         if (!window.confirm('Tem certeza que deseja deletar esta postagem?')) {
             return
@@ -192,29 +224,65 @@ const Profile = () => {
     const usersToList = showFollowers ? userProfile.followers : userProfile.following
 
     return (
-        <ProfileLayout>
+        <ProfileLayout className="padding6">
             <MainColumn>
                 <h2>
                     {isMyProfile ? 'Meu Perfil' : `Perfil de @${userProfile.username}`}
                     {!isMyProfile && (
-                        <button onClick={handleToggleFollow} disabled={isTogglingFollow}>
+                        <Button onClick={handleToggleFollow} disabled={isTogglingFollow}>
                             {isTogglingFollow
                                 ? '...'
                                 : userProfile.is_following
                                   ? 'Deixar de Seguir'
                                   : 'Seguir'}
-                        </button>
+                        </Button>
                     )}
                 </h2>
                 <p>
                     <strong>Usuário:</strong>@{userProfile.username}
                 </p>
-                {userProfile.email && (
+                {isMyProfile ? (
                     <p>
-                        <strong>Email:</strong>
-                        {userProfile.email}
+                        <strong>Email:</strong>{' '}
+                        {isEditingEmail ? (
+                            <>
+                                <input
+                                    type="email"
+                                    value={editedEmail}
+                                    onChange={(e) => setEditedEmail(e.target.value)}
+                                    disabled={isUpdatingProfile}
+                                />
+                                <SaveCancel>
+                                    <Button onClick={handleSaveEmail} disabled={isUpdatingProfile}>
+                                        {isUpdatingProfile ? 'Salvando...' : 'Salvar'}
+                                    </Button>
+                                    <Button
+                                        size="small"
+                                        variant="danger"
+                                        onClick={handleCancelEditEmail}
+                                        disabled={isUpdatingProfile}
+                                    >
+                                        <img src={cancelpng} alt="cancelar" />
+                                    </Button>
+                                </SaveCancel>
+                            </>
+                        ) : (
+                            <>
+                                {userProfile.email || 'Adicione seu email aqui.'}{' '}
+                                <Button onClick={() => setIsEditingEmail(true)}>
+                                    Editar Email
+                                </Button>
+                            </>
+                        )}
                     </p>
+                ) : (
+                    userProfile.email && (
+                        <p>
+                            <strong>Email:</strong> {userProfile.email}
+                        </p>
+                    )
                 )}
+
                 <div>
                     <strong>Bio:</strong>{' '}
                     {isMyProfile ? (
@@ -223,26 +291,28 @@ const Profile = () => {
                                 <textarea
                                     value={editedBio}
                                     onChange={(e) => setEditedBio(e.target.value)}
-                                    rows={3}
+                                    rows={4}
                                     cols={40}
                                     disabled={isUpdatingProfile}
                                 />
-                                <div>
-                                    <button onClick={handleSaveBio} disabled={isUpdatingProfile}>
+                                <SaveCancel>
+                                    <Button onClick={handleSaveBio} disabled={isUpdatingProfile}>
                                         {isUpdatingProfile ? 'Salvando...' : 'Salvar'}
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
+                                        size="small"
+                                        variant="danger"
                                         onClick={handleCancelEditBio}
                                         disabled={isUpdatingProfile}
                                     >
-                                        Cancelar
-                                    </button>
-                                </div>
+                                        <img src={cancelpng} alt="cancelar" />
+                                    </Button>
+                                </SaveCancel>
                             </>
                         ) : (
                             <>
                                 <p>{userProfile.bio || 'Adicione sua bio aqui.'}</p>
-                                <button onClick={() => setIsEditingBio(true)}>Editar Bio</button>
+                                <Button onClick={() => setIsEditingBio(true)}>Editar Bio</Button>
                             </>
                         )
                     ) : (
@@ -256,21 +326,14 @@ const Profile = () => {
                     <strong>Seguindo:</strong> {userProfile.following_count}
                 </p>
                 <h3>Postagens de @{userProfile.username}</h3>
-                <button onClick={() => setShowUserPosts(!showUserPosts)}>
+                <Button onClick={() => setShowUserPosts(!showUserPosts)}>
                     {showUserPosts ? 'Ocultar Postagens' : 'Mostrar Postagens'}
-                </button>
+                </Button>
                 {showUserPosts && (
                     <div>
                         {userPosts && userPosts.length > 0 ? (
                             userPosts.map((post) => (
-                                <div
-                                    key={post.id}
-                                    style={{
-                                        border: '1px solid #eee',
-                                        margin: '10px 0',
-                                        padding: '10px',
-                                    }}
-                                >
+                                <Post key={post.id}>
                                     <p>{post.content}</p>
                                     <div>
                                         <span>
@@ -278,15 +341,21 @@ const Profile = () => {
                                             {new Date(post.created_at).toLocaleString()}
                                         </span>
                                         {isMyProfile && (
-                                            <button
+                                            <Button
+                                                variant="danger"
+                                                size="small"
                                                 onClick={() => handleDeletePost(post.id)}
                                                 disabled={isDeletingPost}
                                             >
-                                                {isDeletingPost ? 'Deletando...' : 'Deletar'}
-                                            </button>
+                                                {isDeletingPost ? (
+                                                    'Deletando...'
+                                                ) : (
+                                                    <img src={deletepng} alt="deletar" />
+                                                )}
+                                            </Button>
                                         )}
                                     </div>
-                                </div>
+                                </Post>
                             ))
                         ) : (
                             <p>Nenhuma postagem encontrada para este usuário.</p>
@@ -297,12 +366,12 @@ const Profile = () => {
             <ProfileAside>
                 <h3>Conexões</h3>
                 <div>
-                    <button onClick={() => setShowFollowers(true)} disabled={showFollowers}>
+                    <Button onClick={() => setShowFollowers(true)} disabled={showFollowers}>
                         Seguidores ({userProfile.followers_count})
-                    </button>
-                    <button onClick={() => setShowFollowers(false)} disabled={!showFollowers}>
+                    </Button>
+                    <Button onClick={() => setShowFollowers(false)} disabled={!showFollowers}>
                         Seguindo ({userProfile.following_count})
-                    </button>
+                    </Button>
                 </div>
                 <div>
                     <h4>{showFollowers ? 'Lista de Seguidores:' : 'Lista de Seguindo:'}</h4>
@@ -310,7 +379,9 @@ const Profile = () => {
                         <ul>
                             {usersToList.map((user: SimpleUser) => (
                                 <li key={user.id}>
-                                    <Link to={`/profile/${user.id}`}>@{user.username}</Link>
+                                    <StyledLink to={`/profile/${user.id}`}>
+                                        @{user.username}
+                                    </StyledLink>
                                 </li>
                             ))}
                         </ul>

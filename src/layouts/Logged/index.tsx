@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout, selectUserId } from '../../store/reducers/auth'
 import { useGetUserByIdQuery } from '../../services/api'
-import { Header, Nav } from './styles'
+import { Header, Nav, TitleSub } from './styles'
+import { Button, StyledLink } from '../../styles'
+import logoutpng from '../../assets/logout_16dp_FF0000_FILL0_wght400_GRAD0_opsz20.svg'
 
 const LoggedLayout = () => {
     const dispatch = useDispatch()
@@ -47,7 +49,10 @@ const LoggedLayout = () => {
     return (
         <div>
             <Header>
-                <h1>PequiEater</h1>
+                <TitleSub>
+                    <h1>PequiEater</h1>
+                    <p>Lugar de roer</p>
+                </TitleSub>
                 <Nav>
                     <ul>
                         {currentUser && !isLoadingCurrentUser && (
@@ -57,17 +62,21 @@ const LoggedLayout = () => {
                         )}
                         {!isAtFeed && (
                             <li>
-                                <Link to="/feed">Roeções</Link>
+                                <StyledLink to="/feed">Roeções</StyledLink>
                             </li>
                         )}
                         {!isAtMyProfile && loggedInUserId && (
                             <li>
-                                <Link to={`/profile/${loggedInUserId}`}>Meu Perfil</Link>
+                                <StyledLink to={`/profile/${loggedInUserId}`}>
+                                    Meu Perfil
+                                </StyledLink>
                             </li>
                         )}
 
                         <li>
-                            <button onClick={handleLogout}>Sair</button>
+                            <Button size="small" variant="danger" onClick={handleLogout}>
+                                <img src={logoutpng} alt="logout" />
+                            </Button>
                         </li>
                     </ul>
                 </Nav>

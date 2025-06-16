@@ -23,3 +23,19 @@ export const ProfileAside = styled.aside`
     flex: 1;
     min-width: 240px;
 `
+
+export const Post = styled.div`
+    border: 1px solid #ccc;
+    margin: 10px 0;
+    padding: 10px;
+
+    button {
+        margin-left: 6px;
+    }
+`
+export const SaveCancel = styled.div`
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+`

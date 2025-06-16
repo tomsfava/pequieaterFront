@@ -10,6 +10,10 @@ export const TitleSub = styled.div`
         margin: 2px;
         line-height: 1;
     }
+
+    p {
+        padding-left: 2px;
+    }
 `
 
 export const Center = styled.div`
