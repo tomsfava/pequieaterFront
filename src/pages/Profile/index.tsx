@@ -7,6 +7,7 @@ import {
     useUpdateUserProfileMutation,
     useGetPostsQuery,
     useDeletePostMutation,
+    useDeleteUserMutation,
 } from '../../services/api'
 import { logout, selectUserId } from '../../store/reducers/auth'
 import type { ApiError, SimpleUser } from '../../types/api'
@@ -52,7 +53,10 @@ const Profile = () => {
     const [updateUserProfile, { isLoading: isUpdatingProfile }] = useUpdateUserProfileMutation()
     const [deletePost, { isLoading: isDeletingPost, isError: isDeleteError, error: deleteError }] =
         useDeletePostMutation()
-
+    const [
+        deleteUser,
+        { isLoading: isDeletingUser, isError: isDeleteUserError, error: deleteUserError },
+    ] = useDeleteUserMutation()
     const isMyProfile = loggedInUserId === parsedUserId
 
     const [isEditingBio, setIsEditingBio] = useState(false)
@@ -135,6 +139,20 @@ const Profile = () => {
                 )
             }
         }
+
+        if (isDeleteUserError && deleteUserError) {
+            console.error('Erro ao deletar usuário:', deleteUserError)
+            if ('data' in deleteUserError) {
+                const apiError = deleteUserError.data as ApiError
+                alert(
+                    `Falha ao deletar usuário: ${apiError?.detail || apiError?.non_field_errors?.[0] || 'Erro desconhecido da API'}`
+                )
+            } else {
+                alert(
+                    `Falha ao deletar usuário: ${(deleteUserError as any).message || (deleteUserError as any).error || 'Erro desconhecido'}`
+                )
+            }
+        }
     }, [
         isErrorCurrentUser,
         currentUserError,
@@ -144,6 +162,8 @@ const Profile = () => {
         userPostsError,
         isDeleteError,
         deleteError,
+        isDeleteUserError,
+        deleteUserError,
         dispatch,
         navigate,
     ])
@@ -221,13 +241,47 @@ const Profile = () => {
         }
     }
 
+    const handleDeleteUser = async () => {
+        if (!parsedUserId) return
+        if (!window.confirm('Tem certeza de que deseja excluir sua conta?')) {
+            return
+        }
+
+        try {
+            await deleteUser(parsedUserId).unwrap()
+            alert('Conta excluída com sucesso')
+            dispatch(logout())
+            navigate('/')
+        } catch (err) {
+            console.error('Erro ao deletar usuário:', err)
+        }
+    }
+
     const usersToList = showFollowers ? userProfile.followers : userProfile.following
 
     return (
         <ProfileLayout className="padding6">
             <MainColumn>
                 <h2>
-                    {isMyProfile ? 'Meu Perfil' : `Perfil de @${userProfile.username}`}
+                    {isMyProfile ? (
+                        <>
+                            Meu Perfil{' '}
+                            <Button
+                                variant="danger"
+                                size="small"
+                                onClick={handleDeleteUser}
+                                disabled={isDeletingUser}
+                            >
+                                {isDeletingUser ? (
+                                    'Deletando'
+                                ) : (
+                                    <img src={deletepng} alt="deletar conta" />
+                                )}
+                            </Button>
+                        </>
+                    ) : (
+                        `Perfil de @${userProfile.username}`
+                    )}
                     {!isMyProfile && (
                         <Button onClick={handleToggleFollow} disabled={isTogglingFollow}>
                             {isTogglingFollow
