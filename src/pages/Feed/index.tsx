@@ -9,6 +9,9 @@ import {
 } from '../../services/api'
 import { logout, selectUserId } from '../../store/reducers/auth'
 import type { ApiError } from '../../types/api'
+import { FormPost, Post } from './styles'
+import { Button, StyledLink } from '../../styles'
+import deletepng from '../../assets/delete_16dp_FF0000_FILL0_wght400_GRAD0_opsz20.svg'
 
 const Feed = () => {
     const [feedType, setFeedType] = useState<'all' | 'following'>('all')
@@ -142,63 +145,68 @@ const Feed = () => {
     }
 
     return (
-        <div>
-            <form onSubmit={handleCreatePost}>
-                <h3>Roeção</h3>
+        <div className="padding6">
+            <FormPost onSubmit={handleCreatePost}>
+                <h3>Comece a roer:</h3>
                 <textarea
                     value={newPostContent}
                     onChange={(e) => setNewPostContent(e.target.value)}
                     placeholder="Cuidado com o espinho... mas solta o dente!"
                     rows={4}
+                    cols={40}
                     disabled={isCreatingPost}
                 />
-                <button type="submit" disabled={isCreatingPost}>
+                <Button type="submit" disabled={isCreatingPost}>
                     {isCreatingPost ? 'Publicando...' : 'Publicar'}
-                </button>
-            </form>
+                </Button>
+            </FormPost>
 
             <hr />
 
             <div>
-                <button onClick={() => setFeedType('all')} disabled={feedType === 'all'}>
-                    Todas as postagens
-                </button>
-                <button
-                    onClick={() => setFeedType('following')}
-                    disabled={feedType === 'following'}
-                >
-                    Apenas quem eu sigo
-                </button>
-            </div>
+                <h2>Roeções</h2>
+                <hr />
 
-            <hr />
+                <div>
+                    <Button onClick={() => setFeedType('all')} disabled={feedType === 'all'}>
+                        Todas as roeções
+                    </Button>
+                    <Button
+                        onClick={() => setFeedType('following')}
+                        disabled={feedType === 'following'}
+                    >
+                        Apenas quem eu sigo
+                    </Button>
+                </div>
 
-            <div>
+                <hr />
                 {posts && posts.length > 0 ? (
                     posts.map((post) => (
-                        <div
-                            key={post.id}
-                            style={{ border: '1px solid #ccc', margin: '10px 0', padding: '10px' }}
-                        >
+                        <Post key={post.id}>
                             <p>{post.content}</p>
                             <div>
-                                <Link to={`/profile/${post.author.id}`}>
+                                <StyledLink to={`/profile/${post.author.id}`}>
                                     @{post.author.username}
-                                </Link>
+                                </StyledLink>
                                 <span> - {new Date(post.created_at).toLocaleString()}</span>
                                 {loggedInUserId === post.author.id && (
-                                    <button
+                                    <Button
+                                        variant="danger"
+                                        size="small"
                                         onClick={() => handleDeletePost(post.id)}
                                         disabled={isDeletingPost}
                                     >
-                                        {isDeletingPost ? 'Deletando...' : 'Deletar'}
-                                    </button>
+                                        {isDeletingPost ? (
+                                            'Deletando...'
+                                        ) : (
+                                            <img src={deletepng} alt="delete" />
+                                        )}
+                                    </Button>
                                 )}
                             </div>
-                        </div>
+                        </Post>
                     ))
-                ) : // Alteração na mensagem condicional
-                feedType === 'following' ? (
+                ) : feedType === 'following' ? (
                     <p>Ninguém que você segue roeu ainda.</p>
                 ) : (
                     <p>Nenhuma roeção na area, que tal criar uma?</p>

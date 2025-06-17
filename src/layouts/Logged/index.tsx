@@ -1,8 +1,11 @@
 import { useEffect } from 'react'
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { logout, selectUserId } from '../store/reducers/auth'
-import { useGetUserByIdQuery } from '../services/api' // Changed to useGetUserByIdQuery
+import { logout, selectUserId } from '../../store/reducers/auth'
+import { useGetUserByIdQuery } from '../../services/api'
+import { Header, Nav, TitleSub } from './styles'
+import { Button, StyledLink } from '../../styles'
+import logoutpng from '../../assets/logout_16dp_FF0000_FILL0_wght400_GRAD0_opsz20.svg'
 
 const LoggedLayout = () => {
     const dispatch = useDispatch()
@@ -16,7 +19,7 @@ const LoggedLayout = () => {
         isLoading: isLoadingCurrentUser,
         isError: isErrorCurrentUser,
         error: currentUserError,
-    } = useGetUserByIdQuery(loggedInUserId!, { skip: !loggedInUserId }) // Changed to useGetUserByIdQuery with skip
+    } = useGetUserByIdQuery(loggedInUserId!, { skip: !loggedInUserId })
 
     useEffect(() => {
         if (isErrorCurrentUser && currentUserError) {
@@ -45,29 +48,39 @@ const LoggedLayout = () => {
 
     return (
         <div>
-            <header>
-                <h1>PequiEater</h1>
-                <nav>
+            <Header>
+                <TitleSub>
+                    <h1>PequiEater</h1>
+                    <p>Lugar de roer</p>
+                </TitleSub>
+                <Nav>
                     <ul>
-                        <li>
-                            <Link to="/feed">Feed</Link>
-                        </li>
-                        {loggedInUserId && (
-                            <li>
-                                <Link to={`/profile/${loggedInUserId}`}>Meu Perfil</Link>
-                            </li>
-                        )}
                         {currentUser && !isLoadingCurrentUser && (
                             <li>
                                 Olá, <span>{currentUser.username}</span>!
                             </li>
                         )}
+                        {!isAtFeed && (
+                            <li>
+                                <StyledLink to="/feed">Roeções</StyledLink>
+                            </li>
+                        )}
+                        {!isAtMyProfile && loggedInUserId && (
+                            <li>
+                                <StyledLink to={`/profile/${loggedInUserId}`}>
+                                    Meu Perfil
+                                </StyledLink>
+                            </li>
+                        )}
+
                         <li>
-                            <button onClick={handleLogout}>Sair</button>
+                            <Button size="small" variant="danger" onClick={handleLogout}>
+                                <img src={logoutpng} alt="logout" />
+                            </Button>
                         </li>
                     </ul>
-                </nav>
-            </header>
+                </Nav>
+            </Header>
             <main>
                 <Outlet />
             </main>

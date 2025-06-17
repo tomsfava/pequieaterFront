@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { useLoginMutation } from '../../services/api'
 import { setCredentials, selectIsAuthenticated } from '../../store/reducers/auth'
 import type { ApiError } from '../../types/api'
+import { Button, StyledLink } from '../../styles'
+import { FormLogin, Field, FormFooter } from './styles'
 
 const Login = () => {
     const [username, setUsername] = useState('')
@@ -68,8 +70,8 @@ const Login = () => {
     return (
         <div>
             <h2>Login</h2>
-            <form onSubmit={handleSubmit}>
-                <div>
+            <FormLogin onSubmit={handleSubmit}>
+                <Field>
                     <label htmlFor="username">Usuário:</label>
                     <input
                         type="text"
@@ -78,8 +80,8 @@ const Login = () => {
                         onChange={(e) => setUsername(e.target.value)}
                         required
                     />
-                </div>
-                <div>
+                </Field>
+                <Field>
                     <label htmlFor="password">Senha:</label>
                     <input
                         type="password"
@@ -88,15 +90,15 @@ const Login = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                </div>
-                <button type="submit" disabled={isLoading}>
+                </Field>
+                <Button type="submit" disabled={isLoading}>
                     {isLoading ? 'Entrando...' : 'Login'}
-                </button>
+                </Button>
                 {isError && <p>Erro ao fazer login. Verifique suas credenciais</p>}
-            </form>
-            <p>
-                Não tem uma conta? <Link to="/register">Cadastre-se</Link>
-            </p>
+            </FormLogin>
+            <FormFooter>
+                Não tem uma conta? <StyledLink to="/register">Cadastre-se</StyledLink>
+            </FormFooter>
         </div>
     )
 }

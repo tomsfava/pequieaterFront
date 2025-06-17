@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { useRegisterMutation } from '../../services/api'
 import type { ApiError } from '../../types/api'
+import { Button, StyledLink } from '../../styles'
+import { FormRegister, Field, FormFooter } from './styles'
 
 const Register = () => {
     const [username, setUsername] = useState('')
@@ -70,8 +72,8 @@ const Register = () => {
     return (
         <div>
             <h2>Cadastro</h2>
-            <form onSubmit={handleSubmit}>
-                <div>
+            <FormRegister onSubmit={handleSubmit}>
+                <Field>
                     <label htmlFor="register-username">Usuário:</label>
                     <input
                         type="text"
@@ -80,8 +82,8 @@ const Register = () => {
                         onChange={(e) => setUsername(e.target.value)}
                         required
                     />
-                </div>
-                <div>
+                </Field>
+                <Field>
                     <label htmlFor="register-email">Email:</label>
                     <input
                         type="email"
@@ -90,8 +92,8 @@ const Register = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                </div>
-                <div>
+                </Field>
+                <Field>
                     <label htmlFor="register-password">Senha:</label>
                     <input
                         type="password"
@@ -100,8 +102,8 @@ const Register = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                </div>
-                <div>
+                </Field>
+                <Field>
                     <label htmlFor="register-password2">Confirme a senha:</label>
                     <input
                         type="password"
@@ -110,8 +112,8 @@ const Register = () => {
                         onChange={(e) => setPassword2(e.target.value)}
                         required
                     />
-                </div>
-                <div>
+                </Field>
+                <Field>
                     <label htmlFor="register-bio">Bio (Opcional):</label>
                     <textarea
                         id="register-bio"
@@ -119,14 +121,14 @@ const Register = () => {
                         onChange={(e) => setBio(e.target.value)}
                         rows={4}
                     />
-                </div>
-                <button type="submit" disabled={isLoading}>
+                </Field>
+                <Button type="submit" disabled={isLoading}>
                     {isLoading ? 'Cadastrando...' : 'Cadastrar'}
-                </button>
-            </form>
-            <p>
-                Já tem uma conta? <Link to="/">Fazer Login</Link>
-            </p>
+                </Button>
+            </FormRegister>
+            <FormFooter>
+                Já tem uma conta? <StyledLink to="/">Fazer Login</StyledLink>
+            </FormFooter>
         </div>
     )
 }
