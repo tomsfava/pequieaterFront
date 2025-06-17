@@ -17,6 +17,12 @@ export const MainColumn = styled.section`
     min-width: 300px;
     word-break: break-word;
     overflow-wrap: break-word;
+
+    h2 {
+        button {
+            margin-left: 6px;
+        }
+    }
 `
 
 export const ProfileAside = styled.aside`
