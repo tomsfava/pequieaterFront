@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
     useGetPostsQuery,
     useCreatePostMutation,
@@ -21,12 +21,11 @@ const Feed = () => {
         isLoading: isLoadingPosts,
         isError: isErrorPosts,
         error: postsError,
-        refetch: refetchPosts,
     } = useGetPostsQuery({ filter: feedType === 'following' ? 'following' : undefined })
 
     const loggedInUserId = useSelector(selectUserId)
     const {
-        data: currentUser,
+        data: _currentUser,
         isLoading: isLoadingMe,
         isError: isErrorMe,
         error: meError,
