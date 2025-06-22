@@ -39,7 +39,7 @@ export const api = createApi({
 
         getUserById: builder.query<UserPublic, string | number>({
             query: (id) => `/user/${id}/`,
-            providesTags: (result, error, id) => [{ type: 'User', id }],
+            providesTags: (_result, _error, id) => [{ type: 'User', id }],
         }),
 
         getPosts: builder.query<Post[], { authorId?: string | number; filter?: 'following' }>({
@@ -78,7 +78,7 @@ export const api = createApi({
                 url: `/user/${userIdToFollow}/toggle-follow/`,
                 method: 'POST',
             }),
-            invalidatesTags: (result, error, id) => [
+            invalidatesTags: (_result, _error, id) => [
                 { type: 'User', id },
                 { type: 'User', id: 'me' },
             ],
@@ -93,7 +93,7 @@ export const api = createApi({
                 method: 'PATCH',
                 body: data,
             }),
-            invalidatesTags: (result, error, { id }) => [{ type: 'User', id }],
+            invalidatesTags: (_result, _error, { id }) => [{ type: 'User', id }],
         }),
 
         deleteUser: builder.mutation<void, number>({
