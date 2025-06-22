@@ -34,7 +34,7 @@ const Profile = () => {
     } = useGetUserByIdQuery(parsedUserId!, { skip: !parsedUserId })
 
     const {
-        data: currentUserData,
+        data: _currentUserData,
         isLoading: isLoadingCurrentUser,
         isError: isErrorCurrentUser,
         error: currentUserError,
