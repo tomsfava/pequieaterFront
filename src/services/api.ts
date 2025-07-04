@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import type { AuthResponse, UserPublic, Post } from '../types/api'
+import type { AuthResponse, UserPublic, Post, Comment } from '../types/api'
 import type { RootState } from '../store'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -20,7 +20,14 @@ export const api = createApi({
     endpoints: (builder) => ({
         register: builder.mutation<
             AuthResponse,
-            { username: string; email: string; password: string; password2: string; bio: string }
+            {
+                username: string
+                email: string
+                password: string
+                password2: string
+                bio: string
+                avatar_url?: string
+            }
         >({
             query: (credentials) => ({
                 url: '/register/',
@@ -56,7 +63,7 @@ export const api = createApi({
             providesTags: ['Post'],
         }),
 
-        createPost: builder.mutation<Post, { content: string }>({
+        createPost: builder.mutation<Post, { content: string; image_url?: string }>({
             query: (newPost) => ({
                 url: '/posts/',
                 method: 'POST',
@@ -95,6 +102,13 @@ export const api = createApi({
             }),
             invalidatesTags: (_result, _error, { id }) => [{ type: 'User', id }],
         }),
+        changePassword: builder.mutation<void, { old_password: string; new_password: string }>({
+            query: (data) => ({
+                url: '/user/change-password/',
+                method: 'POST',
+                body: data,
+            }),
+        }),
 
         deleteUser: builder.mutation<void, number>({
             query: (id) => ({
@@ -102,6 +116,28 @@ export const api = createApi({
                 method: 'DELETE',
             }),
             invalidatesTags: ['User'],
+        }),
+
+        toggleLike: builder.mutation<Post, number>({
+            query: (postId) => ({
+                url: `/posts/${postId}/like/`,
+                method: 'POST',
+            }),
+            invalidatesTags: ['Post'],
+        }),
+
+        getComments: builder.query<Comment[], number>({
+            query: (postId) => `posts/${postId}/comments`,
+            providesTags: (_result, _error, postId) => [{ type: 'Post', id: postId }],
+        }),
+
+        createComment: builder.mutation<Comment, { postId: number; content: string }>({
+            query: ({ postId, content }) => ({
+                url: `/posts/${postId}/comments`,
+                method: 'POST',
+                body: { content },
+            }),
+            invalidatesTags: (_result, _error, { postId }) => [{ type: 'Post', id: postId }],
         }),
     }),
 })
@@ -115,5 +151,9 @@ export const {
     useDeletePostMutation,
     useToggleFollowMutation,
     useUpdateUserProfileMutation,
+    useChangePasswordMutation,
     useDeleteUserMutation,
+    useToggleLikeMutation,
+    useGetCommentsQuery,
+    useCreateCommentMutation,
 } = api
