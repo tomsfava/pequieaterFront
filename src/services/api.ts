@@ -127,17 +127,24 @@ export const api = createApi({
         }),
 
         getComments: builder.query<Comment[], number>({
-            query: (postId) => `posts/${postId}/comments`,
+            query: (postId) => `posts/${postId}/comments/`,
             providesTags: (_result, _error, postId) => [{ type: 'Post', id: postId }],
         }),
 
         createComment: builder.mutation<Comment, { postId: number; content: string }>({
             query: ({ postId, content }) => ({
-                url: `/posts/${postId}/comments`,
+                url: `/posts/${postId}/comments/`,
                 method: 'POST',
                 body: { content },
             }),
             invalidatesTags: (_result, _error, { postId }) => [{ type: 'Post', id: postId }],
+        }),
+        deleteComment: builder.mutation<void, number>({
+            query: (commentId) => ({
+                url: `/posts/comments/${commentId}/`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: ['Post'],
         }),
     }),
 })
@@ -156,4 +163,5 @@ export const {
     useToggleLikeMutation,
     useGetCommentsQuery,
     useCreateCommentMutation,
+    useDeleteCommentMutation,
 } = api

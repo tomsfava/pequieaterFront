@@ -6,15 +6,21 @@ import {
     useCreatePostMutation,
     useDeletePostMutation,
     useGetUserByIdQuery,
+    useToggleLikeMutation,
+    useGetCommentsQuery,
+    useCreateCommentMutation,
 } from '../../services/api'
 import { logout, selectUserId } from '../../store/reducers/auth'
 import type { ApiError } from '../../types/api'
-import { FormPost, Post } from './styles'
+import CommentSection from '../../components/CommentSection'
+import { FormPost, Post, PostImage, ToggleCommentsLink } from './styles'
 import { Button, StyledLink } from '../../styles'
 import deletepng from '../../assets/delete_16dp_FF0000_FILL0_wght400_GRAD0_opsz20.svg'
 
 const Feed = () => {
     const [feedType, setFeedType] = useState<'all' | 'following'>('all')
+    const [newComment, setNewComment] = useState<{ [postId: number]: string }>({})
+    const [showComments, setShowComments] = useState<{ [postId: number]: boolean }>({})
 
     const {
         data: posts,
@@ -35,6 +41,8 @@ const Feed = () => {
         useCreatePostMutation()
     const [deletePost, { isLoading: isDeletingPost, isError: isDeleteError, error: deleteError }] =
         useDeletePostMutation()
+    const [toggleLike] = useToggleLikeMutation()
+    const [createComment] = useCreateCommentMutation()
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -183,11 +191,27 @@ const Feed = () => {
                     posts.map((post) => (
                         <Post key={post.id}>
                             <p>{post.content}</p>
+                            {post.image_url && (
+                                <div>
+                                    <PostImage src={post.image_url} alt="Imagem da postagem" />
+                                </div>
+                            )}
                             <div>
                                 <StyledLink to={`/profile/${post.author.id}`}>
                                     @{post.author.username}
                                 </StyledLink>
                                 <span> - {new Date(post.created_at).toLocaleString()}</span>
+                                <ToggleCommentsLink
+                                    onClick={() =>
+                                        setShowComments((prev) => ({
+                                            ...prev,
+                                            [post.id]: !prev[post.id],
+                                        }))
+                                    }
+                                >
+                                    {showComments[post.id] ? 'Esconder comentários' : 'Comentários'}
+                                </ToggleCommentsLink>
+
                                 {loggedInUserId === post.author.id && (
                                     <Button
                                         variant="danger"
@@ -203,6 +227,44 @@ const Feed = () => {
                                     </Button>
                                 )}
                             </div>
+                            {showComments[post.id] && (
+                                <div style={{ marginTop: '10px' }}>
+                                    <CommentSection postId={post.id} />
+                                    <form
+                                        onSubmit={async (e) => {
+                                            e.preventDefault()
+                                            const content = newComment[post.id]
+                                            if (!content?.trim()) return
+                                            try {
+                                                await createComment({
+                                                    postId: post.id,
+                                                    content,
+                                                }).unwrap()
+                                                setNewComment((prev) => ({
+                                                    ...prev,
+                                                    [post.id]: '',
+                                                }))
+                                            } catch (err) {
+                                                console.error('Erro ao comentar:', err)
+                                            }
+                                        }}
+                                    >
+                                        <textarea
+                                            value={newComment[post.id] || ''}
+                                            onChange={(e) =>
+                                                setNewComment((prev) => ({
+                                                    ...prev,
+                                                    [post.id]: e.target.value,
+                                                }))
+                                            }
+                                            placeholder="Deixe um comentário..."
+                                            rows={2}
+                                            cols={40}
+                                        />
+                                        <Button type="submit">Comentar</Button>
+                                    </form>
+                                </div>
+                            )}
                         </Post>
                     ))
                 ) : feedType === 'following' ? (
