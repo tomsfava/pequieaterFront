@@ -7,13 +7,13 @@ import {
     useDeletePostMutation,
     useGetUserByIdQuery,
     useToggleLikeMutation,
-    useGetCommentsQuery,
     useCreateCommentMutation,
 } from '../../services/api'
 import { logout, selectUserId } from '../../store/reducers/auth'
 import type { ApiError } from '../../types/api'
 import CommentSection from '../../components/CommentSection'
-import { FormPost, Post, PostImage, ToggleCommentsLink } from './styles'
+import CommentCountLink from '../../components/CommentCountLink'
+import { FormPost, Post, PostImage } from './styles'
 import { Button, StyledLink } from '../../styles'
 import deletepng from '../../assets/delete_16dp_FF0000_FILL0_wght400_GRAD0_opsz20.svg'
 
@@ -201,16 +201,24 @@ const Feed = () => {
                                     @{post.author.username}
                                 </StyledLink>
                                 <span> - {new Date(post.created_at).toLocaleString()}</span>
-                                <ToggleCommentsLink
-                                    onClick={() =>
+                                <Button
+                                    onClick={() => toggleLike(post.id)}
+                                    size="small"
+                                    style={{ marginLeft: '10px' }}
+                                >
+                                    {post.liked_by_user ? '💚' : '🤍'} {post.likes_count}
+                                </Button>
+
+                                <CommentCountLink
+                                    postId={post.id}
+                                    showComments={showComments[post.id]}
+                                    toggle={() =>
                                         setShowComments((prev) => ({
                                             ...prev,
                                             [post.id]: !prev[post.id],
                                         }))
                                     }
-                                >
-                                    {showComments[post.id] ? 'Esconder comentários' : 'Comentários'}
-                                </ToggleCommentsLink>
+                                />
 
                                 {loggedInUserId === post.author.id && (
                                     <Button
