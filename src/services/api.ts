@@ -102,7 +102,7 @@ export const api = createApi({
             }),
             invalidatesTags: (_result, _error, { id }) => [{ type: 'User', id }],
         }),
-        changePassword: builder.mutation<void, { old_password: string; new_password: string }>({
+        changePassword: builder.mutation<void, { current_password: string; new_password: string }>({
             query: (data) => ({
                 url: '/user/change-password/',
                 method: 'POST',
