@@ -7,6 +7,7 @@ export interface AuthResponse {
 export interface SimpleUser {
     id: number
     username: string
+    avatar_url?: string
 }
 
 export interface UserPublic {
@@ -14,6 +15,7 @@ export interface UserPublic {
     username: string
     email: string
     bio: string
+    avatar_url?: string
     followers_count: number
     following_count: number
     is_following: boolean
@@ -22,6 +24,16 @@ export interface UserPublic {
 }
 
 export interface Post {
+    id: number
+    content: string
+    image_url?: string
+    author: SimpleUser
+    created_at: string
+    likes_count: number
+    liked_by_user: boolean
+}
+
+export interface Comment {
     id: number
     content: string
     author: SimpleUser

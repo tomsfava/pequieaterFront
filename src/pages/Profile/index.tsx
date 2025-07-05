@@ -8,10 +8,11 @@ import {
     useGetPostsQuery,
     useDeletePostMutation,
     useDeleteUserMutation,
+    useChangePasswordMutation,
 } from '../../services/api'
 import { logout, selectUserId } from '../../store/reducers/auth'
 import type { ApiError, SimpleUser } from '../../types/api'
-import { ProfileLayout, MainColumn, ProfileAside, Post, SaveCancel } from './styles'
+import { ProfileLayout, MainColumn, ProfileAside, Post, SaveCancel, Avatar } from './styles'
 import { Button, StyledLink } from '../../styles'
 import deletepng from '../../assets/delete_16dp_FF0000_FILL0_wght400_GRAD0_opsz20.svg'
 import cancelpng from '../../assets/cancel_16dp_FF0000_FILL0_wght400_GRAD0_opsz20.svg'
@@ -67,6 +68,13 @@ const Profile = () => {
 
     const [showFollowers, setShowFollowers] = useState(true)
     const [showUserPosts, setShowUserPosts] = useState(false)
+
+    const [isEditingPassword, setIsEditingPassword] = useState(false)
+    const [currentPassword, setCurrentPassword] = useState('')
+    const [newPassword, setNewPassword] = useState('')
+    const [confirmNewPassword, setConfirmNewPassword] = useState('')
+
+    const [changePassword, { isLoading: isChangingPassword }] = useChangePasswordMutation()
 
     useEffect(() => {
         if (userProfile && userProfile.bio) {
@@ -257,6 +265,81 @@ const Profile = () => {
         }
     }
 
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('upload_preset', 'unsigned_avatar')
+
+        try {
+            const response = await fetch('https://api.cloudinary.com/v1_1/dhn7uzmdg/image/upload', {
+                method: 'POST',
+                body: formData,
+            })
+
+            const data = await response.json()
+
+            if (data.secure_url) {
+                await updateUserProfile({
+                    id: parsedUserId!,
+                    data: { avatar_url: data.secure_url },
+                }).unwrap()
+
+                refetchUserProfile()
+                alert('Avatar atualizado com sucesso!')
+            } else {
+                alert('Falha ao fazer upload da imagem.')
+            }
+        } catch (err) {
+            console.error('Erro ao fazer upload para o Cloudinary:', err)
+            alert('Erro ao fazer upload da imagem.')
+        }
+    }
+
+    const handleRemoveAvatar = async () => {
+        if (!parsedUserId) return
+
+        if (!window.confirm('Tem certeza que deseja remover o avatar?')) {
+            return
+        }
+
+        try {
+            await updateUserProfile({ id: parsedUserId, data: { avatar_url: '' } }).unwrap()
+            refetchUserProfile()
+            alert('Avatar removido com sucesso!')
+        } catch (err) {
+            console.error('Erro ao remover avatar:', err)
+            alert('Falha ao remover avatar. Tente novamente.')
+        }
+    }
+
+    const handleChangePassword = async () => {
+        if (newPassword !== confirmNewPassword) {
+            alert('A nova senha e a confirmação não coincidem.')
+            return
+        }
+
+        try {
+            await changePassword({
+                current_password: currentPassword,
+                new_password: newPassword,
+            }).unwrap()
+            alert('Senha alterada com sucesso!')
+            setIsEditingPassword(false)
+            setCurrentPassword('')
+            setNewPassword('')
+            setConfirmNewPassword('')
+        } catch (err) {
+            console.error('Erro ao alterar senha:', err)
+            const apiError = err as { data?: ApiError; message?: string; error?: string }
+            alert(
+                `Falha ao alterar senha: ${apiError.data?.detail || apiError.message || apiError.error || 'Erro desconhecido.'}`
+            )
+        }
+    }
+
     const usersToList = showFollowers ? userProfile.followers : userProfile.following
 
     return (
@@ -292,6 +375,28 @@ const Profile = () => {
                         </Button>
                     )}
                 </h2>
+                {userProfile.avatar_url && (
+                    <div>
+                        <Avatar
+                            src={userProfile.avatar_url}
+                            alt={`Avatar de ${userProfile.username}`}
+                        />
+                        <Button variant="danger" size="small" onClick={handleRemoveAvatar}>
+                            <img src={deletepng} alt="deletar" />
+                        </Button>
+                    </div>
+                )}
+                {isMyProfile && (
+                    <div>
+                        <label htmlFor="avatarUpload">Atualizar avatar:</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            id="avatarUpload"
+                            onChange={handleAvatarUpload}
+                        />
+                    </div>
+                )}
                 <p>
                     <strong>Usuário:</strong>@{userProfile.username}
                 </p>
@@ -323,7 +428,7 @@ const Profile = () => {
                         ) : (
                             <>
                                 {userProfile.email || 'Adicione seu email aqui.'}{' '}
-                                <Button onClick={() => setIsEditingEmail(true)}>
+                                <Button size="small" onClick={() => setIsEditingEmail(true)}>
                                     Editar Email
                                 </Button>
                             </>
@@ -335,6 +440,56 @@ const Profile = () => {
                             <strong>Email:</strong> {userProfile.email}
                         </p>
                     )
+                )}
+
+                {isMyProfile && (
+                    <div>
+                        {isEditingPassword ? (
+                            <>
+                                <input
+                                    type="password"
+                                    placeholder="Senha atual"
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    disabled={isChangingPassword}
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="Nova senha"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    disabled={isChangingPassword}
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="Confirmar nova senha"
+                                    value={confirmNewPassword}
+                                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                                    disabled={isChangingPassword}
+                                />
+                                <SaveCancel>
+                                    <Button
+                                        onClick={handleChangePassword}
+                                        disabled={isChangingPassword}
+                                    >
+                                        {isChangingPassword ? 'Alterando...' : 'Salvar Senha'}
+                                    </Button>
+                                    <Button
+                                        variant="danger"
+                                        size="small"
+                                        onClick={() => setIsEditingPassword(false)}
+                                        disabled={isChangingPassword}
+                                    >
+                                        <img src={cancelpng} alt="cancelar" />
+                                    </Button>
+                                </SaveCancel>
+                            </>
+                        ) : (
+                            <Button size="small" onClick={() => setIsEditingPassword(true)}>
+                                Alterar Senha
+                            </Button>
+                        )}
+                    </div>
                 )}
 
                 <div>
@@ -366,7 +521,9 @@ const Profile = () => {
                         ) : (
                             <>
                                 <p>{userProfile.bio || 'Adicione sua bio aqui.'}</p>
-                                <Button onClick={() => setIsEditingBio(true)}>Editar Bio</Button>
+                                <Button size="small" onClick={() => setIsEditingBio(true)}>
+                                    Editar Bio
+                                </Button>
                             </>
                         )
                     ) : (

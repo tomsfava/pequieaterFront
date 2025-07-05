@@ -9,6 +9,7 @@ export const ProfileLayout = styled.div`
 
     @media (max-width: 768px) {
         flex-direction: column;
+        gap: 16px;
     }
 `
 
@@ -20,8 +21,14 @@ export const MainColumn = styled.section`
 
     h2 {
         button {
-            margin-left: 6px;
+            margin-left: 8px;
+            vertical-align: middle;
         }
+    }
+
+    & > div,
+    p {
+        margin-bottom: 16px;
     }
 `
 
@@ -44,4 +51,20 @@ export const SaveCancel = styled.div`
     display: flex;
     align-items: center;
     gap: 6px;
+`
+
+export const Avatar = styled.img`
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+
+    @media (max-width: 768px) {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 1rem;
+        display: block;
+    }
 `

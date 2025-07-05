@@ -15,3 +15,9 @@ export const Post = styled.div`
         margin-left: 6px;
     }
 `
+
+export const PostImage = styled.img`
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
+`
